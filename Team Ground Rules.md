@@ -1,5 +1,6 @@
-# Team Ground Rules
-v0.9
+# Team Ground Rules(version 0.9)
+작성일: 2025.09.11
+
 
 # 팀 운영 원칙 (Team Ground Rules)
 
