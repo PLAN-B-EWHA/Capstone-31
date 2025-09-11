@@ -1,8 +1,7 @@
-# Team Ground Rules(version 0.9)
-작성일: 2025.09.11
+# 팀 운영 원칙 (Team Ground Rules) version 0.9
+수정일: 2025.09.11
 
 
-# 팀 운영 원칙 (Team Ground Rules)
 
 ## 1. 기본 자세
 - 모르는 것을 부끄러워하지 말고, 적극적으로 질문하고 함께 배웁시다.
