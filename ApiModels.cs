@@ -45,6 +45,12 @@ public class ChildListEnvelope
     public ChildData[] data;
 }
 
+[Serializable]
+public class PinVerificationRequest
+{
+    public string pin;
+}
+
 // ── GameSession ────────────────────────────────────────────────────────────
 
 [Serializable]

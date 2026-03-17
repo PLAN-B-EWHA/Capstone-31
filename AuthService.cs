@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ public class AuthService : MonoBehaviour
     public bool IsLoggedIn { get; private set; }
     public string AccessToken { get; private set; } = string.Empty;
 
-    // 재로그인을 위해 마지막으로 성공한 자격증명을 저장합니다.
+    // 토큰 만료 시 자동 재로그인을 위해 마지막 로그인 정보를 보관합니다.
     private string savedEmail = string.Empty;
     private string savedPassword = string.Empty;
 
@@ -35,11 +35,10 @@ public class AuthService : MonoBehaviour
                     apiClient.SetAccessToken(AccessToken);
                     IsLoggedIn = true;
 
-                    // 재로그인에 사용할 자격증명을 저장합니다.
                     savedEmail = email;
                     savedPassword = password;
 
-                    // 토큰 만료 시 재로그인 콜백을 ApiClient에 등록합니다.
+                    // 토큰 만료 시 ApiClient가 이 핸들러를 호출해 재로그인을 시도합니다.
                     apiClient.SetReLoginHandler(ReLogin);
 
                     onDone?.Invoke(true, body);
@@ -56,17 +55,17 @@ public class AuthService : MonoBehaviour
         }, skipReLogin: true);
     }
 
-    // 토큰 만료(401) 감지 시 ApiClient가 호출하는 재로그인 핸들러입니다.
+    // 401 응답이 오면 ApiClient가 이 메서드를 호출합니다.
     private IEnumerator ReLogin(Action<bool> onDone)
     {
         if (string.IsNullOrEmpty(savedEmail) || string.IsNullOrEmpty(savedPassword))
         {
-            Debug.LogError("ReLogin: 저장된 자격증명이 없습니다. 먼저 Login()을 호출해주세요.");
+            Debug.LogError("ReLogin: 저장된 로그인 정보가 없습니다. 먼저 Login()을 호출해주세요.");
             onDone?.Invoke(false);
             yield break;
         }
 
-        Debug.Log("ReLogin: 액세스 토큰 만료 감지 — 재로그인 시도 중...");
+        Debug.Log("ReLogin: 토큰 만료를 감지해 재로그인을 시도합니다.");
 
         bool reLoginOk = false;
         yield return Login(savedEmail, savedPassword, (ok, _) =>
@@ -74,7 +73,7 @@ public class AuthService : MonoBehaviour
             reLoginOk = ok;
             if (ok)
             {
-                Debug.Log("ReLogin: 재로그인 성공, 요청을 재시도합니다.");
+                Debug.Log("ReLogin: 재로그인 성공, 요청을 다시 시도합니다.");
             }
             else
             {
