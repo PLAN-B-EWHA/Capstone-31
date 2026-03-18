@@ -82,7 +82,7 @@ public class GameFlowController : MonoBehaviour
         }
 
         SetStatus("미션 불러오는 중...");
-        yield return missionService.FetchMissions(list =>
+        yield return missionService.FetchMissions(sessionToken, list =>
         {
             missions = list;
             Debug.Log($"GAME FLOW: missions loaded count={missions.Length}");
