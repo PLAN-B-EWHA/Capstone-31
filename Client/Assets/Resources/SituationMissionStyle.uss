@@ -1,0 +1,24 @@
+.button-respond {
+    width: 85%;
+    height: 18%;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 18px;
+    margin-left: 20px;
+    padding-top: 10px;
+    padding-right: 15px;
+    padding-bottom: 10px;
+    padding-left: 15px;
+    background-color: rgb(255, 255, 255);
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-width: 3.5px;
+    border-right-width: 3.5px;
+    border-bottom-width: 3.5px;
+    border-left-width: 3.5px;
+    font-size: 30px;
+    white-space: normal;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/CookieRun%20Regular%20SDF.asset?fileID=11400000&guid=990c9e680b563464d8c75b5e65e9a8dc&type=2#CookieRun Regular SDF");
+}
