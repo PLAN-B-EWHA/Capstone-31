@@ -1818,54 +1818,80 @@ JSON
 }
 """
 
-def generate_test():
+def run_bulk_generation(target_character, start_idx, end_idx):
+    """
+    target_character: "Minjun", "Seoyeon", "Jihu", "Haeun" 중 선택
+    start_idx, end_idx: all_seeds.csv의 행 인덱스 (0~100 등)
+    """
+    
     # CSV 파일 로드
     try:
-        df = pd.read_csv("all_seeds.csv")
+        # csv 파일 인코딩 확인 (cp949 또는 utf-8)
+        df = pd.read_csv("all_seeds.csv", encoding="cp949") 
     except FileNotFoundError:
-        print("'all_seeds.csv' 파일을 찾을 수 없습니다. 경로를 확인해주세요.")
+        print("'all_seeds.csv' 파일을 찾을 수 없습니다.")
         return
 
-    # 결과 저장 폴더
-    output_dir = "test_results"
+    # 결과 저장 폴더 생성
+    output_dir = "final_results"
     os.makedirs(output_dir, exist_ok=True)
 
-    # 딱 상위 3개만 추출
-    test_df = df.head(1)
-    print(f"테스트 생성을 시작합니다. (대상: {len(test_df)}건)")
+    # 작업 대상 슬라이싱
+    target_df = df.iloc[start_idx:end_idx]
+    batch_results = []
+    
+    print(f"🔥 [{target_character}] 대량 생성을 시작합니다. (대상: {len(target_df)}건)")
 
-    for index, row in test_df.iterrows():
-        prompt = f"""
-        [입력 데이터]
-        - 캐릭터: {row['character']}
-        - 단계: {row['stage']}단계
-        - 주제: {row['theme']}
-        - 상황: {row['seed_text']}
-        
-        위 데이터를 바탕으로 시스템 지침에 따라 시나리오 JSON을 생성해줘.
-        """
-
-        try:
-            response = client.models.generate_content(
-            model="gemini-1.5-flash", 
-            config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_INSTRUCTION,
-            response_mime_type="application/json",
-            temperature=0.7
-            ),
-            contents=prompt
-)
-
-            # 파일 저장 (ID 기반 파일명)
-            file_path = f"{output_dir}/{row['scenario_id']}.json"
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(response.text)
+    try:
+        for index, row in target_df.iterrows():
+            # 입력 데이터 구성
+            prompt = f"""
+            [입력 데이터]
+            - 캐릭터: {row['character']}
+            - 단계: {row['stage']}단계
+            - 주제: {row['theme']}
+            - 상황: {row['seed_text']}
             
-            print(f"[{index+1}/3] 생성 완료: {file_path}")
-            time.sleep(10) # 무료 티어 속도 제한 방지
+            위 데이터를 바탕으로 시스템 지침에 따라 시나리오 JSON을 생성해줘.
+            """
 
-        except Exception as e:
-            print(f"[{index+1}/3] 실패: {row['scenario_id']} | 에러: {e}")
+            try:
+                print(f"[{index + 1}/{end_idx}] {row['scenario_id']} 생성 중...", end=" ", flush=True)
+                
+                response = client.models.generate_content(
+                    model="gemini-2.5-pro", # Pro 모델로 업그레이드!
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_INSTRUCTION,
+                        response_mime_type="application/json",
+                        temperature=0.7
+                    ),
+                    contents=prompt
+                )
+
+                # JSON 파싱 및 리스트 추가
+                scenario_data = json.loads(response.text)
+                batch_results.append(scenario_data)
+                
+                print("✅ 성공")
+                
+                # 유료 티어라도 너무 빠르면 에러 날 수 있으니 짧게 휴식
+                time.sleep(3) 
+
+            except Exception as e:
+                print(f"❌ 실패: {row['scenario_id']} | 에러: {e}")
+                continue # 실패한 건 건너뛰고 다음으로 진행
+
+    finally:
+        # 에러가 나거나 도중에 멈춰도 지금까지 뽑은 건 저장함
+        if batch_results:
+            file_path = f"{output_dir}/{target_character}_batch_{start_idx}_{end_idx}.json"
+            with open(file_path, "w", encoding="utf-8-sig") as f:
+                json.dump(batch_results, f, ensure_ascii=False, indent=4)
+            print(f"\n💾 현재까지 생성된 {len(batch_results)}건의 데이터를 저장했습니다: {file_path}")
+        else:
+            print("\n저장할 데이터가 없습니다.")
 
 if __name__ == "__main__":
-    generate_test()
+    # 예: 민준이 0번부터 100번 행까지 생성
+    run_bulk_generation("Minjun", 0, 5)
+>>>>>>> Stashed changes
