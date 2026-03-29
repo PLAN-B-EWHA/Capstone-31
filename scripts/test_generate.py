@@ -153,7 +153,16 @@ OO와는 이른바 '엄마 친구 딸/아들' 사이입니다. 두 사람의 어
 - 무작위 순서: options 배열 내에서 점수(0, 1, 2)의 배치는 매번 무작위여야 한다.
 - 확장성: 2명 이상 등장 시 sub_characters에 이름을 넣고, 대사 앞에 이름을 붙여 구분하라. 한 명일 경우 sub_characters와 sub_char_pos는 null이다.
 
-7. JSON 구조 샘플 (Example)
+6. 대화 흐름 로직 (Dialogue Flow Logic) - 중요!
+- 0점(Bad) 선택 시: npc_reaction은 "너랑 말 안 해", "그건 좀 아닌 것 같아" 처럼 부정적인 감정 표현으로 끝맺어야 함. 질문을 던지지 말 것.
+- 2점/1점 선택 시: npc_reaction은 플레이어의 말에 대한 짧은 피드백(공감, 수락)만 수행함.
+- 다음 턴(turn_id+1)의 npc_utterance: 여기서 비로소 NPC가 새로운 주제를 꺼내거나 질문을 던짐.
+- 데이터 흐름 예시:
+    (Turn 1) 옵션 2점: "나 축구 좋아해!"
+    (Turn 1) npc_reaction: "오, 너도 축구 좋아하는구나! 반갑다." (여기서 질문 금지)
+    (Turn 2) npc_utterance: "근데 넌 보통 어느 포지션에서 뛰어? 난 공격수거든." (여기서 새로운 질문 시작)
+
+8. JSON 구조 샘플 (Example)
 JSON
 {
   "scenario_id": "W01_MJ_001",
@@ -1827,7 +1836,7 @@ def run_bulk_generation(target_character, start_idx, end_idx):
     # CSV 파일 로드
     try:
         # csv 파일 인코딩 확인 (cp949 또는 utf-8)
-        df = pd.read_csv("all_seeds.csv", encoding="cp949") 
+        df = pd.read_csv("all_seeds.csv", encoding="utf-8") 
     except FileNotFoundError:
         print("'all_seeds.csv' 파일을 찾을 수 없습니다.")
         return
@@ -1893,5 +1902,4 @@ def run_bulk_generation(target_character, start_idx, end_idx):
 
 if __name__ == "__main__":
     # 예: 민준이 0번부터 100번 행까지 생성
-    run_bulk_generation("Minjun", 0, 5)
->>>>>>> Stashed changes
+    run_bulk_generation("Seoyeon", 90, 96)
