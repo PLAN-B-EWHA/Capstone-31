@@ -1,47 +1,64 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
-// 로그인 -> 아동 목록 조회 -> PIN 확인 후 세션 생성 -> 미션 로드까지
-// 한 번에 확인할 수 있는 예시 플로우 컨트롤러입니다.
+// 로그인 -> 아동 목록 조회 -> PIN 확인 후 세션 생성 -> 시나리오 로드까지
+// 한 번에 제어하는 상위 흐름 컨트롤러입니다.
+// 현재 프로젝트에서는 "언제 어떤 서비스를 호출할지"를 결정하고,
+// 마지막에 ScenarioDebugView로 데이터를 넘겨 화면 표시를 시작시키는 역할을 합니다.
 public class GameFlowController : MonoBehaviour
 {
     [Header("Service References")]
-    // 같은 GameObject에 붙은 서비스 컴포넌트를 연결합니다.
+    // Inspector에서 각 서비스 컴포넌트를 연결합니다.
     [SerializeField] private AuthService authService;
     [SerializeField] private ChildSessionService childSessionService;
-    [SerializeField] private MissionService missionService;
-    [SerializeField] private GameResultService gameResultService;
+    [SerializeField] private ScenarioService scenarioService;
 
     [Header("Login")]
     // 부모 계정 로그인 정보입니다.
     [SerializeField] private string email = "parent@test.com";
     [SerializeField] private string password = "12341234";
     [SerializeField] private string pin = "1234";
+    // true면 인증 단계를 건너뛰고 시나리오만 바로 조회합니다.
+    [SerializeField] private bool loadScenariosWithoutLogin = false;
+    // 시나리오 조회 시 사용할 주차 값입니다.
+    [SerializeField] private int scenarioWeek = 1;
 
     [Header("Child Selection")]
-    // 아동 목록을 불러온 뒤 자동으로 선택할 인덱스입니다.
-    // 실제 UI가 있으면 SelectChildAndCreateSession(childId)를 직접 호출하면 됩니다.
+    // 로그인 경로를 탈 때 자동 선택할 아동 인덱스입니다.
     [SerializeField] private int autoSelectChildIndex = 0;
 
     [Header("Optional UI")]
+    // 상태 한 줄을 출력하는 보조 UI.
     [SerializeField] private StatusTextView statusTextView;
-    [SerializeField] private MissionDebugView missionDebugView;
+    // 시나리오 내용을 실제로 렌더링하는 뷰.
+    [SerializeField] private ScenarioDebugView scenarioDebugView;
 
+    // 로그인 후 접근 가능한 아동 목록.
     private ChildData[] availableChildren = System.Array.Empty<ChildData>();
     private string selectedChildId = string.Empty;
     private string sessionToken = string.Empty;
-    private UnityMissionPayload[] missions = System.Array.Empty<UnityMissionPayload>();
+    // 마지막으로 조회된 시나리오 배열.
+    private ScenarioPayload[] scenarios = System.Array.Empty<ScenarioPayload>();
 
     private void Start()
     {
+        // 샘플 씬에서는 진입 즉시 전체 흐름을 시작합니다.
         StartCoroutine(InitializeFlow());
     }
 
     private IEnumerator InitializeFlow()
     {
+        // 시나리오 API만 빨리 확인할 때 쓰는 디버그 경로입니다.
+        if (loadScenariosWithoutLogin)
+        {
+            yield return LoadScenariosOnly();
+            yield break;
+        }
+
         SetStatus("로그인 중...");
 
         bool loginOk = false;
+        // 1) 부모 로그인
         yield return authService.Login(email, password, (ok, body) =>
         {
             loginOk = ok;
@@ -56,6 +73,7 @@ public class GameFlowController : MonoBehaviour
         }
 
         SetStatus("아동 목록 불러오는 중...");
+        // 2) 접근 가능한 아동 목록 조회
         yield return childSessionService.FetchChildren(children =>
         {
             availableChildren = children;
@@ -73,6 +91,7 @@ public class GameFlowController : MonoBehaviour
         Debug.Log($"GAME FLOW: child selected index={idx}, childId={availableChildren[idx].childId}, name={availableChildren[idx].name}");
         SetStatus($"아동 선택: {availableChildren[idx].name}");
 
+        // 3) PIN 검증 후 세션 생성
         yield return SelectChildAndCreateSession(availableChildren[idx].childId);
 
         if (string.IsNullOrEmpty(sessionToken))
@@ -81,28 +100,78 @@ public class GameFlowController : MonoBehaviour
             yield break;
         }
 
-        SetStatus("미션 불러오는 중...");
-        yield return missionService.FetchMissions(sessionToken, list =>
+        if (scenarioService == null)
         {
-            missions = list;
-            Debug.Log($"GAME FLOW: missions loaded count={missions.Length}");
-            SetStatus($"준비 완료 - 아동: {availableChildren[idx].name}, 미션: {missions.Length}개");
+            Debug.LogWarning("GAME FLOW: ScenarioService가 연결되지 않아 시나리오 로드를 건너뜁니다.");
+            yield break;
+        }
 
-            if (missionDebugView != null)
+        SetStatus("시나리오 불러오는 중...");
+        // 4) 주차 기준 시나리오 전체 배열 조회
+        yield return scenarioService.FetchScenariosForWeek(scenarioWeek, list =>
+        {
+            scenarios = list;
+            Debug.Log($"GAME FLOW: scenarios loaded week={scenarioWeek}, count={scenarios.Length}");
+
+            if (scenarios.Length > 0)
             {
-                missionDebugView.ShowMissions(missions);
+                Debug.Log($"GAME FLOW: first scenario id={scenarios[0].scenario_id}, title={scenarios[0].metadata?.lobby_title}");
             }
+
+            if (scenarioDebugView != null)
+            {
+                // 5) UI로 배열 전체를 넘기면 첫 번째 시나리오부터 표시가 시작됩니다.
+                scenarioDebugView.ShowScenarios(scenarios);
+            }
+
+            SetStatus($"준비 완료 - 아동: {availableChildren[idx].name}, 시나리오: {scenarios.Length}개");
         });
 
-        if (missions.Length == 0)
+        if (scenarios.Length == 0)
         {
-            Debug.LogWarning("GAME FLOW: 로드된 미션이 없습니다.");
+            Debug.LogWarning($"GAME FLOW: week={scenarioWeek} 에 해당하는 시나리오가 없습니다.");
         }
     }
 
-    // 아동 선택 UI가 있다면 버튼 클릭 시 이 메서드를 호출하면 됩니다.
+    private IEnumerator LoadScenariosOnly()
+    {
+        // 로그인 없이 ScenarioService만 독립적으로 검증하는 경로입니다.
+        if (scenarioService == null)
+        {
+            Debug.LogWarning("GAME FLOW: ScenarioService가 연결되지 않아 시나리오 단독 로드를 진행할 수 없습니다.");
+            SetStatus("ScenarioService 연결 필요");
+            yield break;
+        }
+
+        SetStatus("시나리오만 불러오는 중...");
+        yield return scenarioService.FetchScenariosForWeek(scenarioWeek, list =>
+        {
+            scenarios = list;
+            Debug.Log($"GAME FLOW: scenarios only loaded week={scenarioWeek}, count={scenarios.Length}");
+
+            if (scenarios.Length > 0)
+            {
+                Debug.Log($"GAME FLOW: first scenario id={scenarios[0].scenario_id}, title={scenarios[0].metadata?.lobby_title}");
+            }
+
+            if (scenarioDebugView != null)
+            {
+                scenarioDebugView.ShowScenarios(scenarios);
+            }
+
+            SetStatus($"시나리오 로드 완료: {scenarios.Length}개");
+        });
+
+        if (scenarios.Length == 0)
+        {
+            Debug.LogWarning($"GAME FLOW: week={scenarioWeek} 에 해당하는 시나리오가 없습니다.");
+        }
+    }
+
+    // 아동 선택 UI가 있다면 버튼 클릭 시 이 메서드를 직접 호출할 수 있습니다.
     public IEnumerator SelectChildAndCreateSession(string childId)
     {
+        // 실제 PIN 확인과 세션 발급은 ChildSessionService가 담당합니다.
         Debug.Log($"GAME FLOW: pin verify start childId={childId}");
         SetStatus("PIN 확인 중...");
 
@@ -123,51 +192,15 @@ public class GameFlowController : MonoBehaviour
         selectedChildId = childId;
         sessionToken = newToken;
 
+        // 이후 후속 호출에서 사용할 현재 세션 상태를 보관합니다.
         string childName = System.Array.Find(availableChildren, c => c.childId == childId)?.name ?? childId;
         Debug.Log($"GAME FLOW: pin verify success childId={childId}, childName={childName}");
         SetStatus($"세션 준비 완료 - 아동: {childName}");
     }
 
-    // 실제 게임 플레이가 끝난 시점에 호출하면 됩니다.
-    public void SaveResult(bool success, int score, float durationSeconds, int retryCount)
-    {
-        if (missions.Length == 0)
-        {
-            Debug.LogWarning("GAME FLOW: 미션이 없어 결과를 저장할 수 없습니다.");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(sessionToken))
-        {
-            Debug.LogWarning("GAME FLOW: sessionToken이 없어 결과를 저장할 수 없습니다.");
-            return;
-        }
-
-        var req = new GameResultRequest
-        {
-            sessionToken = sessionToken,
-            missionId = missions[0].missionId,
-            success = success,
-            score = score,
-            durationSeconds = durationSeconds,
-            retryCount = retryCount,
-        };
-
-        StartCoroutine(gameResultService.SaveResult(req, (code, body) =>
-        {
-            Debug.Log($"GAME FLOW: result save code={code}");
-            Debug.Log(body);
-        }));
-    }
-
-    [ContextMenu("Save Mock Result")]
-    public void SaveMockResult()
-    {
-        SaveResult(success: true, score: 85, durationSeconds: 42.5f, retryCount: 1);
-    }
-
     private void SetStatus(string message)
     {
+        // 상태 UI가 없어도 전체 로직은 계속 실행되도록 null-safe하게 둡니다.
         if (statusTextView != null)
         {
             statusTextView.SetStatus(message);

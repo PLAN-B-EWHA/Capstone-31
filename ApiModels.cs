@@ -69,72 +69,77 @@ public class GameSessionEnvelope
     public GameSessionData data;
 }
 
-// ── Mission ────────────────────────────────────────────────────────────────
+// ── Scenario ───────────────────────────────────────────────────────────────
 
 [Serializable]
-public class UnityMissionImportRequest
-{
-    public UnityMissionPayload[] missions;
-}
-
-[Serializable]
-public class UnityMissionListData
-{
-    public UnityMissionPayload[] missions;
-}
-
-[Serializable]
-public class UnityMissionListEnvelope
+public class ScenarioListEnvelope
 {
     public bool success;
-    public UnityMissionListData data;
+    public ScenarioPayload[] data;
 }
 
 [Serializable]
-public class UnityMissionPayload
+public class ScenarioDetailEnvelope
 {
-    public int missionId;
-    public string missionName;
-    public string missionTypeString;
-    public string targetKeyword;
-    public string targetEmotionString;
-    public ExpressionData expression_data;
-    public SituationData situation_data;
-}
-
-[Serializable]
-public class ExpressionData
-{
-    public string[] characterDialogue;
-    public string[] successFeedback;
-    public string[] retryFeedback;
-    public string[] failFeedback;
-}
-
-[Serializable]
-public class SituationData
-{
-    public string[] situationDescription;
-    public string question;
-    public SituationOption[] options;
-}
-
-[Serializable]
-public class SituationOption
-{
-    public int id;
-    public string text;
-    public bool isCorrect;
-    public string[] feedback;
-}
-
-[Serializable]
-public class GameResultRequest
-{
-    public string sessionToken;
-    public int missionId;
     public bool success;
+    public ScenarioPayload data;
+}
+
+[Serializable]
+public class ScenarioPayload
+{
+    public string scenario_id;
+    public ScenarioMetadata metadata;
+    public ScenarioCast cast;
+    public DialogueTurnPayload[] dialogue_flow;
+    public ScenarioFinalSummary final_summary;
+}
+
+[Serializable]
+public class ScenarioMetadata
+{
+    public int week;
+    public string theme;
+    public string relationship_stage;
+    public string scenario_seed;
+    public string lobby_title;
+    public string background_image_id;
+}
+
+[Serializable]
+public class ScenarioCast
+{
+    public string main_character;
+    public string main_char_pos;
+    public string sub_characters;
+    public string sub_char_pos;
+}
+
+[Serializable]
+public class ScenarioFinalSummary
+{
+    public string total_learning_point;
+}
+
+[Serializable]
+public class DialogueTurnPayload
+{
+    public int turn_id;
+    public string internal_monologue;
+    public string[] npc_utterance;
+    public string npc_animation;
+    public string npc_expression;
+    public DialogueOptionPayload[] options;
+}
+
+[Serializable]
+public class DialogueOptionPayload
+{
     public int score;
-    public float durationSeconds;
-    public int retryCount;
+    public string text;
+    public string peers_logic;
+    public string feedback;
+    public string[] npc_reaction;
+    public string reaction_animation;
+    public string reaction_expression;
 }
