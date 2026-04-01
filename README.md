@@ -1,3 +1,9 @@
+- ApiClient는 씬에 1개만 둔다
+- ScenarioRawJsonLoader의 apiClient 필드에 ApiClient를 연결한다.
+- 호출하는 기존 스크립트의 loader 필드에도 같은 ScenarioRawJsonLoader를 연결한다.
+- baseUrl은 https://api.myexpressionfriend.site
+
+
 # 스크립트 안내 (HTTP + Raw JSON 전용)
 
 현재 `Assets/scripts`는 의도적으로 아래 2개 런타임 스크립트만 사용하는 구조입니다.
