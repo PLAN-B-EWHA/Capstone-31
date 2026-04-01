@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -13,21 +14,21 @@ public class ScenarioRawJsonLoader : MonoBehaviour
     {
         if (loadOnStart)
         {
-            StartCoroutine(LoadWeekJson());
+            StartCoroutine(LoadWeekJson(_ => { }));
         }
     }
 
     public void Reload()
     {
-        StartCoroutine(LoadWeekJson());
+        StartCoroutine(LoadWeekJson(_ => { }));
     }
 
-    public IEnumerator LoadWeekJson()
+    public IEnumerator LoadWeekJson(Action<string> onDone)
     {
         if (apiClient == null)
         {
             Debug.LogError("ScenarioRawJsonLoader: ApiClient is not assigned.");
-            SetOutput("ApiClient connection required.");
+            onDone?.Invoke(string.Empty);
             yield break;
         }
 
@@ -46,6 +47,7 @@ public class ScenarioRawJsonLoader : MonoBehaviour
             Debug.Log(body);
         });
 
+        onDone?.Invoke(responseText);
         SetOutput(responseText);
     }
 
