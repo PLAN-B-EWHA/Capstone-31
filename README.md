@@ -1,207 +1,214 @@
-# Unity 시나리오 불러오기 가이드
+# 스크립트 안내 (HTTP + Raw JSON 전용)
 
+현재 `Assets/scripts`는 의도적으로 아래 2개 런타임 스크립트만 사용하는 구조입니다.
 
-현재 기준 흐름은 아래와 같습니다.
+- `ApiClient.cs`
+- `ScenarioRawJsonLoader.cs`
 
-`GameFlowController -> ScenarioService -> ApiClient -> Spring 서버`
+로그인/아동선택/세션/디버그 뷰 같은 나머지 흐름은 헷갈리지 않도록 제거했습니다.
 
-서버 응답 JSON은 `ApiModels.cs`의 DTO로 파싱됩니다.
+## 1) 각 스크립트 역할
 
-## 핵심 파일
+### `ApiClient.cs`
 
-### 1. [ApiModels.cs](/C:/Users/ttutti/myExpressionFriend_NW/Assets/scripts/ApiModels.cs)
+`ApiClient`는 공통 HTTP 통신 유틸입니다.
 
-백엔드 요청/응답 DTO 정의 파일입니다.
+주요 역할:
 
-시나리오 조회에서 중요한 타입:
+- 백엔드 기본 주소(`baseUrl`) 보관
+- `baseUrl + path`로 최종 URL 생성
+- `GET` 요청 전송
+- JSON 바디를 담은 `POST` 요청 전송
+- 응답 본문을 문자열 그대로 콜백으로 반환
 
-- `ScenarioListEnvelope`
-- `ScenarioDetailEnvelope`
-- `ScenarioPayload`
-- `ScenarioMetadata`
-- `DialogueTurnPayload`
-- `DialogueOptionPayload`
+중요: `ApiClient`는 도메인(JSON 구조) 파싱을 하지 않습니다.
 
-백엔드 JSON 구조를 확인할 때 이 파일을 먼저 보면 됩니다.
+### `ScenarioRawJsonLoader.cs`
 
-### 2. [ApiClient.cs](/C:/Users/ttutti/myExpressionFriend_NW/Assets/scripts/ApiClient.cs)
+`ScenarioRawJsonLoader`는 시나리오 엔드포인트를 호출하는 전용 로더입니다.
 
-공통 HTTP 클라이언트입니다.
+주요 역할:
 
-역할:
+- `GET /api/unity/scenarios?week={week}` 호출
+- 응답 본문을 Raw 문자열로 받음
+- 받은 문자열을
+  - 콘솔(`Debug.Log`)
+  - 선택적 TMP 텍스트(`outputText`)
+  에 출력
 
-- `baseUrl` 기준으로 실제 URL 생성
-- GET / POST 요청 전송
-- 로그인 후 access token 자동 헤더 부착
-- 401 발생 시 재로그인 재시도
+중요: DTO 역직렬화 없이 Raw JSON 그대로 다룹니다.
 
-시나리오만 붙일 때는 내부 구현을 깊게 알 필요는 없고,
-Inspector에서 `baseUrl`만 올바르게 넣으면 됩니다.
+## 2) 전체 호출 흐름
 
-예:
+`loadOnStart == true`일 때 실행 순서:
 
-- 로컬 개발: `http://localhost:8080`
+1. Unity가 `ScenarioRawJsonLoader.Start()` 호출
+2. `StartCoroutine(LoadWeekJson())` 실행
+3. `LoadWeekJson()`에서 `apiClient` 연결 여부 확인
+4. `apiClient.Get($"/api/unity/scenarios?week={week}", callback)` 호출
+5. `ApiClient.Get()` 내부에서:
+   - `BuildUrl()`로 최종 URL 생성
+   - `UnityWebRequest.Get(url)` 요청 전송
+   - 완료 후 `responseCode`, `downloadHandler.text` 반환
+6. `ScenarioRawJsonLoader` 콜백에서:
+   - `code`(HTTP 상태코드)
+   - `body`(응답 본문 문자열) 수신
+7. 성공(2xx) 시 `responseText = body`
+8. `SetOutput(responseText)`로 UI 텍스트 출력(선택)
 
-### 3. [ScenarioService.cs](/C:/Users/ttutti/myExpressionFriend_NW/Assets/scripts/ScenarioService.cs)
+## 3) 메서드 상세 설명
 
-시나리오 API 전용 서비스입니다.
+## `ApiClient.cs`
 
-중요 메서드:
+### `Awake()`
 
-- `FetchScenariosForWeek(int week, Action<ScenarioPayload[]> onDone)`
-- `FetchScenario(string scenarioId, Action<ScenarioPayload> onDone)`
+- `ValidateBaseUrl()` 실행
+- URL이 비었거나 `http://`, `https://`가 아니면 경고 출력
 
-현재 Unity에서 주로 쓰는 API:
+### `Get(string path, Action<long, string> onDone)`
 
-- `GET /api/unity/scenarios?week={week}`
+- `BuildUrl(path)`로 URL 생성
+- `UnityWebRequest.Get(url)` 전송
+- 완료 후 `onDone(responseCode, responseBodyText)` 호출
+- HTTP 에러여도 콜백은 호출됩니다
 
-즉, 주차별 시나리오 배열을 받아오는 책임은 이 파일에 있습니다.
+### `PostJson<TReq>(string path, TReq body, Action<long, string> onDone)`
 
-### 4. [GameFlowController.cs](/C:/Users/ttutti/myExpressionFriend_NW/Assets/scripts/GameFlowController.cs)
+- `JsonUtility.ToJson(body)`로 바디 직렬화
+- `Content-Type: application/json`으로 POST 전송
+- 완료 후 `responseCode`, 응답 본문 문자열 반환
 
-언제 시나리오를 불러올지 결정하는 상위 흐름 컨트롤러입니다.
+### `BuildUrl(string path)`
 
-시나리오 확인만 급할 때는 이 옵션이 핵심입니다.
+- `baseUrl` 유효성 확인
+- `CombineUrl()`로 안전하게 조합
 
-- `loadScenariosWithoutLogin = true`
+### `CombineUrl(string root, string path)`
 
-이 값을 켜면:
+- `root` 끝의 `/` 제거
+- `path` 시작의 `/` 제거
+- `root/path` 형태로 결합
 
-- 로그인 생략
-- 아동 선택 생략
-- 바로 `ScenarioService.FetchScenariosForWeek()` 호출
+### `ValidateBaseUrl()`
 
-즉 백엔드 시나리오 API만 살아 있으면 바로 Unity 화면에서 확인할 수 있습니다.
+- 실행 차단은 하지 않고 경고만 출력
+- Inspector 설정 실수 조기 발견용
 
-### 5. [ScenarioDebugView.cs](/C:/Users/ttutti/myExpressionFriend_NW/Assets/scripts/ScenarioDebugView.cs)
+## `ScenarioRawJsonLoader.cs`
 
-시나리오를 화면에 보여주는 디버그 UI입니다.
+### `Start()`
 
-역할:
+- `loadOnStart == true`이면 시작 시 자동 1회 로드
 
-- 받아온 `ScenarioPayload[]`를 내부에 저장
-- 첫 시나리오부터 표시
-- `ShowPrev()` / `ShowNext()`로 시나리오 넘김
-- `pageText`가 연결되어 있으면 `1 / N` 표시
+### `Reload()`
 
-버튼을 이용해 week 안의 여러 시나리오를 하나씩 확인할 때 사용합니다.
+- 수동 재호출 메서드
+- 버튼 `OnClick`에 연결하기 좋음
 
-## 시나리오 불러오기 흐름
+### `LoadWeekJson()`
 
-로그인 없이 시나리오만 확인할 때:
+- 핵심 시나리오 호출 코루틴
+- `apiClient == null`이면 즉시 실패 처리
+- `/api/unity/scenarios?week={week}` 호출
+- 2xx가 아니면:
+  - `Request failed: code=...` 메시지 생성
+  - 에러 로그 출력
+- 2xx면:
+  - `body`를 그대로 `responseText`에 저장
+  - 콘솔에 출력
+- 마지막에 `SetOutput()`으로 TMP 출력
 
-1. `GameFlowController.Start()`
-2. `InitializeFlow()`
-3. `loadScenariosWithoutLogin == true` 확인
-4. `LoadScenariosOnly()` 진입
-5. `ScenarioService.FetchScenariosForWeek(scenarioWeek, ...)` 호출
-6. `ApiClient.Get("/api/unity/scenarios?week=...")`
-7. 응답 JSON을 `ScenarioPayload[]`로 파싱
-8. `ScenarioDebugView.ShowScenarios(scenarios)` 호출
-9. 화면에 첫 시나리오 출력
-10. `Prev` / `Next` 버튼으로 다른 시나리오 확인
+### `SetOutput(string text)`
 
-## Unity Inspector 연결
+- `outputText`가 연결되어 있을 때만 텍스트 표시
+- 비어 있으면 조용히 종료
 
-### 필수 연결
+## 4) Inspector 최소 연결 방법
 
-#### ApiClient
+예시 오브젝트 2개를 만듭니다.
 
-- `Base Url`
-  예: `http://localhost:8080`
+1. `NetworkManager`
+2. `ScenarioLoader`
 
-#### ScenarioService
+컴포넌트 연결:
 
-- `Api Client` 슬롯에 `ApiClient` 연결
+- `NetworkManager` -> `ApiClient`
+- `ScenarioLoader` -> `ScenarioRawJsonLoader`
 
-#### GameFlowController
+필드 설정:
 
-- `Scenario Service` 슬롯에 `ScenarioService` 연결
-- `Scenario Debug View` 슬롯에 `ScenarioDebugView` 연결
-- `Load Scenarios Without Login` 체크
-- `Scenario Week`에 원하는 주차 입력
+- `ScenarioRawJsonLoader.apiClient`에 `NetworkManager(ApiClient)` 드래그
+- `ApiClient.baseUrl` 입력
+  - 로컬: `http://localhost:8080`
+  - 서버: `https://...`
+- `ScenarioRawJsonLoader.week` 입력 (예: `1`)
+- `outputText`는 필요할 때만 연결
 
-#### ScenarioDebugView
+## 5) 여기서 JSON은 정확히 무엇인가?
 
-- `Scenario Text`에 본문 표시용 `TextMeshProUGUI` 연결
-- `Scroll Rect`에 시나리오 스크롤뷰의 `ScrollRect` 연결
-- `Page Text`는 선택사항
+핵심 코드:
 
-## ScrollView + 버튼 연결 예시
+```csharp
+responseText = body;
+```
 
-Hierarchy 예시:
+여기서 `body`는 `ApiClient`의 `req.downloadHandler.text`입니다.
 
-- `Scenario`
-- `Viewport`
-- `Content`
-- `Text (TMP)`
-- `Next`
-- `Prev`
+즉:
 
-권장 연결:
+- `body` = 서버 응답 본문 문자열
+- 엔드포인트가 JSON을 반환하면 `body`는 JSON 문자열
+- `responseText`는 그 JSON 문자열을 그대로 담는 변수
 
-- `ScenarioDebugView`는 `Scenario` 오브젝트에 붙이기
-- `scenarioText` = `Text (TMP)`
-- `scrollRect` = `Scenario`의 `ScrollRect`
-- `GameFlowController.scenarioDebugView` = `Scenario`
+## 6) 자주 나는 문제
 
-버튼 연결:
-
-- `Next` 버튼 `OnClick` -> `Scenario` -> `ScenarioDebugView.ShowNext()`
-- `Prev` 버튼 `OnClick` -> `Scenario` -> `ScenarioDebugView.ShowPrev()`
-
-## 백엔드 API
-
-현재 Unity 시나리오 조회용 엔드포인트:
-
-- `GET /api/unity/scenarios?week=1`
-- `GET /api/unity/scenarios/{scenarioId}`
-
-현재 조회 API는 Unity 런타임용 공개 경로로 열려 있어서,
-로그인 없는 디버그 확인이 가능합니다.
-
-## 가장 자주 나는 문제
-
-### 1. `ScenarioService ApiClient가 연결되지 않았습니다.`
+### `ApiClient is not assigned`
 
 원인:
 
-- `ScenarioService`의 `Api Client` 슬롯이 비어 있음
-
-### 2. `ScenarioDebugView scenarioText가 연결되지 않았습니다.`
-
-원인:
-
-- `ScenarioDebugView`의 `Scenario Text` 슬롯이 비어 있음
-
-### 3. 로그인 시 `Invalid character found in method name`
-
-원인:
-
-- `https://localhost:8080`처럼 HTTPS로 호출했는데 서버는 HTTP로 떠 있음
+- `ScenarioRawJsonLoader.apiClient` 미연결
 
 해결:
 
-- 로컬이면 보통 `http://localhost:8080` 사용
+- `ApiClient`가 붙은 오브젝트를 해당 필드에 연결
 
-### 4. 한글이 네모로 나옴
+### `ApiClient baseUrl is empty`
 
 원인:
 
-- TMP 폰트 에셋에 한글 글리프 없음
+- `ApiClient.baseUrl` 공란
 
 해결:
 
-- 한글 지원 TMP Font Asset으로 교체
+- `http://` 또는 `https://` 포함한 전체 주소 입력
 
-## 최소로 보면 되는 파일
+### 2xx가 아닌 응답 코드 발생
 
-통합 관점에서는 아래 3개를 가장 먼저 보면 됩니다.
+원인:
 
-- [ApiModels.cs]
-- [ScenarioService.cs]
-<<<<<<< HEAD
-- [GameFlowController.cs]
-=======
-- [GameFlowController.cs]
->>>>>>> 1aaab33 (코드 간소화)
+- 경로 오타
+- 서버 미기동
+- 네트워크/CORS/프록시 이슈
+
+해결:
+
+- URL, 서버 상태 점검
+- Postman/curl로 동일 요청 테스트
+
+## 7) 현재 범위 (포함/제외)
+
+현재 포함:
+
+- 공통 HTTP `GET`/`POST`
+- 주차 기준 시나리오 Raw JSON 조회
+
+현재 제외:
+
+- 로그인
+- 아동 선택
+- PIN 검증
+- 세션 토큰 처리
+- DTO 기반 파싱
+- 게임 결과 전송 플로우
+
+지금은 통신 최소 검증 목적이라 의도적으로 단순화한 상태입니다.
