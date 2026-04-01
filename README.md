@@ -200,4 +200,8 @@ Hierarchy 예시:
 
 - [ApiModels.cs]
 - [ScenarioService.cs]
+<<<<<<< HEAD
 - [GameFlowController.cs]
+=======
+- [GameFlowController.cs]
+>>>>>>> 1aaab33 (코드 간소화)
