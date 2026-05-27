@@ -1,0 +1,14 @@
+C:\r2025\backend\dNet\DotNetClient\bin\Debug\net8.0\DotNetClient.exe
+C:\r2025\backend\dNet\DotNetClient\bin\Debug\net8.0\DotNetClient.deps.json
+C:\r2025\backend\dNet\DotNetClient\bin\Debug\net8.0\DotNetClient.runtimeconfig.json
+C:\r2025\backend\dNet\DotNetClient\bin\Debug\net8.0\DotNetClient.dll
+C:\r2025\backend\dNet\DotNetClient\bin\Debug\net8.0\DotNetClient.pdb
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.GeneratedMSBuildEditorConfig.editorconfig
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.AssemblyInfoInputs.cache
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.AssemblyInfo.cs
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.csproj.CoreCompileInputs.cache
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.dll
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\refint\DotNetClient.dll
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.pdb
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.genruntimeconfig.cache
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\ref\DotNetClient.dll
