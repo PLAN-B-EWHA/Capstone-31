@@ -7,7 +7,7 @@ This console app checks the same HTTP flow that Unity will use later:
 1. Login with email and password.
 2. Save the returned access token.
 3. Request an OpenAI Realtime client secret with the same token.
-4. Connect to OpenAI Realtime with that short-lived secret and save spoken audio as a `.wav` file.
+4. Connect to OpenAI Realtime with that short-lived secret and play spoken audio through the PC speaker.
 5. Request selected child data with `Authorization: Bearer`.
 6. Request published Unity scenarios.
 7. Send a dialogue game result with the same token.
@@ -67,14 +67,14 @@ The output should follow this order:
 ```text
 1. Login
 2. Create OpenAI Realtime client secret with access token
-2-1. Send text to Realtime and save spoken audio
+2-1. Send text to Realtime and play spoken audio
 3. Get selected child with access token
 4. Get published Unity scenarios
 5. Save dialogue game result with access token
 ```
 
 If step 2 prints `Realtime client secret created.`, the .NET client successfully requested a short-lived OpenAI Realtime secret through the Spring API.
-If step 2-1 prints `Realtime audio saved.`, the model generated playable audio. The `.wav` file is written under `realtime-output`.
+If step 2-1 prints `Realtime audio played.`, the model generated playable audio and the client streamed it to the PC speaker without writing a `.wav` file.
 
 ## Main Files
 

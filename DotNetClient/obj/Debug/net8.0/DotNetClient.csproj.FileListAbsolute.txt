@@ -12,3 +12,4 @@ C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\refint\DotNetClient.dll
 C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.pdb
 C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.genruntimeconfig.cache
 C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\ref\DotNetClient.dll
+C:\r2025\backend\dNet\DotNetClient\obj\Debug\net8.0\DotNetClient.sourcelink.json

@@ -12,7 +12,7 @@ public static class RealtimeAudioSmokeTest
     private const short Channels = 1;
     private const short BitsPerSample = 16;
 
-    public static async Task<string> CreateAudioAsync(
+    public static async Task PlayAudioAsync(
         RealtimeClientSecretResponse realtime,
         string text,
         CancellationToken cancellationToken = default)
@@ -58,11 +58,12 @@ public static class RealtimeAudioSmokeTest
             }
         }, cancellationToken);
 
-        var pcmAudio = new List<byte>();
         var transcript = new StringBuilder();
+        using var audioPlayer = new StreamingPcmAudioPlayer(SampleRate, Channels, BitsPerSample);
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(TimeSpan.FromSeconds(45));
         var receiveCancellationToken = timeoutCts.Token;
+        var receivedAudio = false;
 
         while (webSocket.State == WebSocketState.Open && !receiveCancellationToken.IsCancellationRequested)
         {
@@ -82,7 +83,8 @@ public static class RealtimeAudioSmokeTest
                 var base64 = audioDelta.GetString();
                 if (!string.IsNullOrWhiteSpace(base64))
                 {
-                    pcmAudio.AddRange(Convert.FromBase64String(base64));
+                    audioPlayer.AddPcm16Samples(Convert.FromBase64String(base64));
+                    receivedAudio = true;
                 }
             }
 
@@ -104,24 +106,19 @@ public static class RealtimeAudioSmokeTest
 
             if (type is "response.output_audio.done" or "response.done")
             {
-                if (pcmAudio.Count > 0)
+                if (receivedAudio)
                 {
                     break;
                 }
             }
         }
 
-        if (pcmAudio.Count == 0)
+        if (!receivedAudio)
         {
             throw new ApiClientException(null, "Realtime response did not include audio data within 45 seconds.");
         }
 
-        Directory.CreateDirectory("realtime-output");
-        var path = Path.GetFullPath(Path.Combine(
-            "realtime-output",
-            $"realtime-{DateTimeOffset.Now:yyyyMMdd-HHmmss}.wav"));
-
-        await File.WriteAllBytesAsync(path, CreateWavFile(pcmAudio.ToArray()), cancellationToken);
+        await audioPlayer.WaitForPlaybackCompleteAsync(cancellationToken);
 
         if (transcript.Length > 0)
         {
@@ -132,8 +129,6 @@ public static class RealtimeAudioSmokeTest
         {
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "done", CancellationToken.None);
         }
-
-        return path;
     }
 
     private static async Task SendJsonAsync(ClientWebSocket webSocket, object payload, CancellationToken cancellationToken)
@@ -169,29 +164,4 @@ public static class RealtimeAudioSmokeTest
         }
     }
 
-    private static byte[] CreateWavFile(byte[] pcmData)
-    {
-        using var stream = new MemoryStream();
-        using var writer = new BinaryWriter(stream, Encoding.ASCII);
-
-        var byteRate = SampleRate * Channels * BitsPerSample / 8;
-        var blockAlign = (short)(Channels * BitsPerSample / 8);
-
-        writer.Write("RIFF"u8.ToArray());
-        writer.Write(36 + pcmData.Length);
-        writer.Write("WAVE"u8.ToArray());
-        writer.Write("fmt "u8.ToArray());
-        writer.Write(16);
-        writer.Write((short)1);
-        writer.Write(Channels);
-        writer.Write(SampleRate);
-        writer.Write(byteRate);
-        writer.Write(blockAlign);
-        writer.Write(BitsPerSample);
-        writer.Write("data"u8.ToArray());
-        writer.Write(pcmData.Length);
-        writer.Write(pcmData);
-
-        return stream.ToArray();
-    }
 }
