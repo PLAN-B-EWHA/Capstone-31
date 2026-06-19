@@ -78,3 +78,5 @@ crashlytics-build.properties
 
 # gemini API 키 탈취 방지
 .env
+**/SecretConfig.cs
+**/SecretConfig.cs.meta

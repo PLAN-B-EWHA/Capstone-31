@@ -1,8 +1,8 @@
 .sheetDialogue {
     flex-grow: 1;
     position: absolute;
-    width: 900px;
-    height: 160px;
+    width: 90%;
+    height: 20%;
     bottom: 50px;
     background-color: rgb(255, 255, 255);
     border-left-color: rgb(169, 171, 170);
@@ -25,7 +25,7 @@
 .textDialogue {
     width: 90%;
     height: 80%;
-    font-size: 35px;
+    font-size: 50px;
     white-space: normal;
     -unity-text-align: middle-left;
     text-overflow: clip;
@@ -49,4 +49,23 @@
 
 .button-next:active {
     scale: 1.2 1.2;
+}
+
+.star {
+    flex-grow: 0;
+    width: 20%;
+    height: 80%;
+    background-image: url("project://database/Assets/UIUX/star.png?fileID=2800000&guid=74c4952eb7de982448e3552be4803768&type=3#star");
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    margin-right: 15px;
+    margin-left: 15px;
+}
+
+.star-active {
+    background-color: rgba(210, 175, 7, 0);
+    -unity-background-image-tint-color: rgb(202, 167, 0);
+}
+
+.star-inactive {
+    -unity-background-image-tint-color: rgb(154, 132, 97);
 }

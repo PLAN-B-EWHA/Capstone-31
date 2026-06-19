@@ -1,0 +1,2 @@
+*.onnx filter=lfs diff=lfs merge=lfs -text
+Client/Assets/model_fp16.onnx filter=lfs diff=lfs merge=lfs -text
