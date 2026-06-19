@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; align-items: center; justify-content: center; background-color: rgb(245, 245, 245); width: 100%; height: 100%;">
+        <ui:VisualElement style="padding: 30px; background-color: rgb(255, 255, 255); border-radius: 15px; width: 100%; border-width: 1px; border-color: rgb(200, 200, 200); height: 100%; justify-content: center;">
+            <ui:Label text="로그인" style="-unity-font-style: bold; font-size: 24px; align-self: center; margin-bottom: 30px; color: rgb(50, 50, 50); width: auto; height: auto;" />
+            <ui:TextField name="IdInput" label="아이디" style="margin-bottom: 15px;" />
+            <ui:TextField name="PwInput" label="비밀번호" password="true" style="margin-bottom: 30px;" />
+            <ui:Button name="LoginButton" text="로그인 하기" style="height: 45px; font-size: 16px; -unity-font-style: bold; background-color: rgb(74, 144, 226); color: rgb(255, 255, 255); border-radius: 8px; border-width: 0;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,170 @@
+.button-home {
+    width: 18%;
+    height: 100%;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+    border-bottom-left-radius: 100px;
+    margin-top: 40px;
+    margin-right: 40px;
+    margin-bottom: 40px;
+    margin-left: 40px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    font-size: 40px;
+    -unity-font-style: bold;
+    -unity-font-definition: initial;
+    flex-grow: 0;
+}
+
+.button-reward {
+    width: 18%;
+    height: 100%;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+    border-bottom-left-radius: 100px;
+    margin-top: 40px;
+    margin-right: 40px;
+    margin-bottom: 40px;
+    margin-left: 40px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    font-size: 40px;
+    -unity-font-style: bold;
+    -unity-font-definition: initial;
+}
+
+.button-reward:active {
+    scale: 1.1 1.1;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+    -unity-font-definition: initial;
+}
+
+.button-home:active {
+    scale: 1.1 1.1;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+    -unity-font-definition: initial;
+}
+
+.sheetBottom {
+    flex-grow: 0;
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    bottom: -8%;
+    background-color: rgb(255, 255, 255);
+    border-top-left-radius: 60px;
+    border-top-right-radius: 60px;
+    border-top-color: rgb(202, 211, 233);
+    border-top-width: 6px;
+    border-right-color: rgb(202, 211, 233);
+    border-bottom-color: rgb(202, 211, 233);
+    border-right-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 6px;
+    border-left-color: rgb(202, 211, 233);
+    align-items: center;
+    display: flex;
+    translate: 0 1090px;
+    transition-duration: 0.5s;
+    -unity-font-definition: initial;
+    flex-shrink: 1;
+}
+
+.sheetBottom-expended {
+    translate: 0 -200px;
+    -unity-font-definition: initial;
+    justify-content: flex-start;
+    transform-origin: center;
+    scale: 1 1;
+}
+
+.sheetDim {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(45, 45, 45, 0.51);
+    display: none;
+    opacity: 0;
+    transition-duration: 0.3s;
+    -unity-font-definition: initial;
+}
+
+.sheetDim-visible {
+    opacity: 1;
+    display: flex;
+    -unity-font-definition: initial;
+}
+
+.button-mission {
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/CookieRun%20Regular%20SDF.asset?fileID=11400000&guid=990c9e680b563464d8c75b5e65e9a8dc&type=2#CookieRun Regular SDF");
+    margin-top: 25px;
+    margin-right: 10px;
+    margin-bottom: 100px;
+    margin-left: 10px;
+    padding-top: 30px;
+    padding-right: 80px;
+    padding-bottom: 30px;
+    padding-left: 80px;
+    width: 95%;
+    height: 290px;
+    white-space: normal;
+    font-size: 65px;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+    border-bottom-left-radius: 100px;
+    background-color: rgb(199, 203, 160);
+    border-left-color: rgb(132, 152, 103);
+    border-right-color: rgb(132, 152, 103);
+    border-top-color: rgb(132, 152, 103);
+    border-bottom-color: rgb(132, 152, 103);
+    border-top-width: 10px;
+    border-right-width: 10px;
+    border-bottom-width: 10px;
+    border-left-width: 10px;
+    -unity-font: initial;
+    -unity-text-align: middle-left;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    align-self: center;
+    -unity-font-style: normal;
+    -unity-text-outline-color: rgba(255, 255, 255, 0);
+    color: rgb(0, 0, 0);
+    -unity-text-outline-width: 0;
+    background-image: none;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.button-mission:active {
+    scale: 1.05 1.05;
+    transition-duration: 0.1s;
+    transition-delay: 0s;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/CookieRun%20Regular%20SDF.asset?fileID=11400000&guid=990c9e680b563464d8c75b5e65e9a8dc&type=2#CookieRun Regular SDF");
+}
+
+.button-mic {
+    background-color: rgba(255, 255, 255, 0);
+    background-image: url("project://database/Assets/UIUX/microphone-Photoroom.png?fileID=2800000&guid=702d3605007e7a74e890c86809240490&type=3#microphone-Photoroom");
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    width: 80px;
+    height: 80px;
+    flex-grow: 0;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}

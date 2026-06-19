@@ -1,0 +1,167 @@
+[
+  {
+    "scenario_id": "W01_MJ_001",
+    "metadata": {
+      "week": 1,
+      "theme": "정보 교환하기 (Trading Information)",
+      "relationship_stage": "1단계 (어색한 탐색기)",
+      "scenario_seed": "3월 첫날: 옆자리에 앉은 민준이에게 조심스럽게 이름 물어보기.",
+      "lobby_title": "옆자리 짝꿍과 첫 인사",
+      "background_image_id": "Classroom_Front"
+    },
+    "cast": {
+      "main_character": "Minjun",
+      "main_char_pos": "Center",
+      "sub_characters": null,
+      "sub_char_pos": null
+    },
+    "dialogue_flow": [
+      {
+        "turn_id": 1,
+        "internal_monologue": "새 학기 첫날이라 너무 긴장돼. 옆자리 친구가 가방을 정리하고 있네? 먼저 말을 걸어볼까?",
+        "npc_utterance": [
+          "민준: (가방을 툭 내려놓으며) 하아, 첫날부터 가방 왜 이렇게 무겁냐.",
+          "민준: 안녕? 난 박민준이야. 넌 이름이 뭐야?"
+        ],
+        "npc_animation": "Idle",
+        "npc_expression": "Neutral",
+        "options": [
+          {
+            "score": 2,
+            "text": "안녕, 난 OO이야! 가방 진짜 무거워 보인다. 나도 오늘 교과서가 많아서 좀 힘들었어. 넌 어디 살아?",
+            "peers_logic": "Good: 내 이름을 알려주며 상대의 말에 공감하고, 대화를 이어가기 위한 질문을 던졌습니다.",
+            "feedback": null,
+            "npc_reaction": [
+              "민준: 오, OO구나! 그치? 나만 무거운 게 아니었네.",
+              "민준: 난 저기 사거리 쪽 사는데, 넌 어느 쪽이야?"
+            ],
+            "reaction_animation": "Happy_Hand_Gesture",
+            "reaction_expression": "Joy"
+          },
+          {
+            "score": 1,
+            "text": "응, 난 OO이야. 반가워.",
+            "peers_logic": "Acceptable: 대답은 잘했지만, 대화를 이어가기 위한 추가 정보나 질문이 부족합니다.",
+            "feedback": "대답은 잘했어! 하지만 민준이가 대화를 계속하고 싶게 질문을 하나 더 던져보는 건 어떨까?",
+            "npc_reaction": [
+              "민준: 아... 응. 반가워.",
+              "민준: (잠시 어색하게 침묵하다가) 넌 이 근처에 살아?"
+            ],
+            "reaction_animation": "Thoughtful_Head_Shake",
+            "reaction_expression": "Neutral"
+          },
+          {
+            "score": 0,
+            "text": "난 OO이야. 내 가방은 2.5kg인데, 중학생 평균보다 가볍네. 넌 가방 정리 좀 해야겠다.",
+            "peers_logic": "Bad: 상대방의 힘든 감정에 공감하기보다 사실 관계를 따지거나 비판적인 조언을 했습니다.",
+            "feedback": "민준이는 지금 가방이 무겁다고 말하고 있어. 지식보다는 민준이의 감정에 먼저 공감해주는 게 좋아! 다시 골라보자.",
+            "npc_reaction": [
+              "민준: 어? 어... 뭐, 그렇게 분석까지 할 일인가.",
+              "민준: (민망해하며 고개를 돌린다)"
+            ],
+            "reaction_animation": "Dismissing_Gesture",
+            "reaction_expression": "Anger"
+          }
+        ]
+      },
+      {
+        "turn_id": 2,
+        "internal_monologue": "민준이가 사는 곳을 물어봤어! 내 동네를 알려주면서 민준이가 좋아하는 게 뭔지 슬쩍 물어볼까?",
+        "npc_utterance": [
+          "민준: 난 사거리 쪽 사는데, 넌 어느 쪽이야? 등굣길 멀어?"
+        ],
+        "npc_animation": "Acknowledging",
+        "npc_expression": "Neutral",
+        "options": [
+          {
+            "score": 0,
+            "text": "난 학교 뒤에 사는데, 너는 사거리에 살면 매일 15분은 걸어야겠네. 비효율적이다.",
+            "peers_logic": "Bad: 상대방의 상황을 '비효율적'이라고 비판하여 기분을 상하게 할 수 있습니다.",
+            "feedback": "상대방의 등굣길을 평가하기보다는, 민준이의 관심사에 대해 질문을 던져봐! 다시 도전해볼까?",
+            "npc_reaction": [
+              "민준: 비효율적...?",
+              "민준: 뭐, 걷는 게 운동도 되고 좋은데 왜 그래."
+            ],
+            "reaction_animation": "Angry_Gesture",
+            "reaction_expression": "Anger"
+          },
+          {
+            "score": 1,
+            "text": "난 학교 뒤에 살아. 등굣길은 안 멀어.",
+            "peers_logic": "Acceptable: 질문에 답은 했지만, 대화를 이어가기 위해 민준이에 대해 궁금한 점을 묻지 않았습니다.",
+            "feedback": "단답형 대답은 대화가 끊길 수 있어. 민준이 가방에 있던 물건에 대해 물어보는 건 어때?",
+            "npc_reaction": [
+              "민준: 아, 그렇구나.",
+              "민준: (축구공을 만지작거리며) 넌 쉬는 시간에 보통 뭐 해?"
+            ],
+            "reaction_animation": "Idle",
+            "reaction_expression": "Neutral"
+          },
+          {
+            "score": 2,
+            "text": "난 학교 바로 뒤쪽 살아! 등교하기 편해. 넌 아까 가방 보니까 축구공 있던데, 축구 좋아해?",
+            "peers_logic": "Good: 상대방의 소지품(축구공)을 관찰하여 관심사를 묻는 훌륭한 대화 기술입니다.",
+            "feedback": null,
+            "npc_reaction": [
+              "민준: 오, 가깝네 부럽다! 아, 이거? 축구부는 아닌데 그냥 점심마다 애들이랑 차거든.",
+              "민준: 너도 축구 좋아해?"
+            ],
+            "reaction_animation": "Head_Nod_Yes",
+            "reaction_expression": "Joy"
+          }
+        ]
+      },
+      {
+        "turn_id": 3,
+        "internal_monologue": "민준이가 축구 이야기를 꺼냈어! 나도 운동이나 게임을 좋아한다는 걸 알려주며 대화를 기분 좋게 마무리해보자.",
+        "npc_utterance": [
+          "민준: 난 점심마다 애들이랑 축구 차거든.",
+          "민준: 너도 운동이나 게임 같은 거 좋아해?"
+        ],
+        "npc_animation": "Happy_Hand_Gesture",
+        "npc_expression": "Joy",
+        "options": [
+          {
+            "score": 2,
+            "text": "나도 게임 진짜 좋아해! 축구는 잘 못하지만 구경하는 건 재밌더라. 다음에 점심때 구경 가도 돼?",
+            "peers_logic": "Best: 공통점을 확인하고, 다음 만남(점심시간)을 자연스럽게 약속하며 대화를 마무리했습니다.",
+            "feedback": null,
+            "npc_reaction": [
+              "민준: 당연하지! 우리 반 애들 다 같이 하니까 너도 와.",
+              "민준: 나중에 게임 뭐 하는지도 알려줘! 반갑다 친구야."
+            ],
+            "reaction_animation": "Head_Nod_Yes",
+            "reaction_expression": "Joy"
+          },
+          {
+            "score": 0,
+            "text": "축구는 부상 위험이 높아서 별로야. 넌 무릎 조심해야겠다. 난 그냥 집에서 혼자 게임 하는 게 좋아.",
+            "peers_logic": "Bad: 상대가 좋아하는 것을 위험하다고 깎아내리고 대화를 차단했습니다.",
+            "feedback": "친구가 좋아하는 것을 부정적으로 말하면 대화가 끝나버려. 긍정적인 연결고리를 찾아 다시 골라봐!",
+            "npc_reaction": [
+              "민준: 걱정은 고마운데... 말이 좀 심하네.",
+              "민준: 나 먼저 갈게."
+            ],
+            "reaction_animation": "Dismissing_Gesture",
+            "reaction_expression": "Sadness"
+          },
+          {
+            "score": 1,
+            "text": "난 운동은 별로고 게임은 좀 해. 축구는 규칙이 너무 복잡한 것 같아.",
+            "peers_logic": "Acceptable: 솔직하게 말했지만, 상대의 제안에 대해 조금 부정적인 인상을 줄 수 있습니다.",
+            "feedback": "솔직한 것도 좋지만, 민준이의 제의에 긍정적인 면을 하나 덧붙여보는 건 어떨까? 다시 해보자!",
+            "npc_reaction": [
+              "민준: 아... 규칙이 좀 많긴 하지.",
+              "민준: 나중에 생각나면 말해줘."
+            ],
+            "reaction_animation": "Thoughtful_Head_Shake",
+            "reaction_expression": "Neutral"
+          }
+        ]
+      }
+    ],
+    "final_summary": {
+      "total_learning_point": "새로운 친구를 만났을 때는 '나의 정보'를 조금 주고, '상대의 정보'를 물어보는 핑퐁이 가장 중요해요!"
+    }
+  }
+]
